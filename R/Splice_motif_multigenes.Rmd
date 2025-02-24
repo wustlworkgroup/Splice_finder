@@ -1,0 +1,133 @@
+---
+title: "Splice_logo_multi_genes"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F,include = F)
+```
+
+
+```{r}
+if (!requireNamespace("Biostrings", quietly = TRUE)) install.packages("Biostrings", repos="http://bioconductor.org/packages/release/bioc/")
+if (!requireNamespace("seqLogo", quietly = TRUE)) install.packages("seqLogo", repos="http://bioconductor.org/packages/release/bioc/")
+
+```
+
+```{r}
+# Function
+generate_PFM <- function(sequences) {
+  seq_length <- nchar(sequences[1])  # Get sequence length
+  bases <- c("A", "C", "G", "T")
+  
+  # Initialize PFM
+  pfm <- matrix(0, nrow = 4, ncol = seq_length, dimnames = list(bases, NULL))
+  
+  # Count occurrences
+  for (seq in sequences) {
+    for (i in 1:seq_length) {
+      base <- substr(seq, i, i)
+      pfm[base, i] <- pfm[base, i] + 1
+    }
+  }
+   column_sums <- colSums(pfm)
+  pfm <- sweep(pfm, 2, column_sums, FUN = "/") 
+  return(pfm)
+}
+
+canocinal_acceptor_sequences <- function(sequences) {
+   # Function to filter sequences where -6G and -7A
+  filtered_seqs <- sequences[
+    substr(sequences, nchar(sequences) - 5, nchar(sequences) - 5) == "G" &  # -6 position
+    substr(sequences, nchar(sequences) - 6, nchar(sequences) - 6) == "A"    # -7 position
+  ]
+  return(filtered_seqs)
+}
+
+canocinal_donor_sequences <- function(sequences) {
+   # Function to filter sequences where -6G and -7A
+  filtered_seqs <- sequences[
+    substr(sequences, nchar(sequences) - 2, nchar(sequences) - 2) == "T" &  # -6 position
+    substr(sequences, nchar(sequences) - 3, nchar(sequences) - 3) == "G"    # -7 position
+  ]
+  return(filtered_seqs)
+}
+```
+
+
+```{r}
+Path="/media/yang/Data/SliceFinder/out_predict"
+
+```
+
+#  The splice donor site is located at the very beginning of an intron (-5 IS THE END OF EXON IN DONOR SEQ)
+## All splice site from multiple genes ()
+```{r, include=F}
+Donor_seq_files=list.files(Path, pattern ="dna_donor_seq",recursive = T,full.names = T )
+Seqlist=list()
+for (i in 1:length(Donor_seq_files)) {
+  fasta_file=Donor_seq_files[i]
+  
+sequences <- Biostrings::readDNAStringSet(fasta_file)
+Seqlist[[i]] <- as.character(sequences)
+}
+# Convert sequences to character vectors
+print (paste0("gene number:", length(Donor_seq_files)))
+seq_list=unlist(Seqlist)
+pfm <- generate_PFM(seq_list)
+pwm <- seqLogo:: makePWM(pfm)
+
+seqLogo::seqLogo(pwm,ic.scale = F)
+```
+# Canocial donor site (GT)
+
+```{r, include=T}
+print (paste0("gene number:", length(Donor_seq_files)))
+# Apply filtering
+filtered_seq_list <-canocinal_donor_sequences(seq_list)
+
+
+seq_list=filtered_seq_list
+pfm <- generate_PFM(seq_list)
+pwm <- seqLogo:: makePWM(pfm)
+
+# Plot sequence logo
+seqLogo::seqLogo(pwm,ic.scale = F)
+```
+\newpage
+
+# The splice acceptor site at the 3' end of the intron terminates the intron with an almost invariant AG sequence  (-5 IS THE START OF EXON IN ACCEPTOR SEQ)
+
+## All acceptor site
+```{r, include=F}
+Acceptor_seq_files=list.files(Path, pattern ="dna_acceptor_seq",recursive = T,full.names = T )
+Seqlist=list()
+for (i in 1:length(Acceptor_seq_files)) {
+  fasta_file=Acceptor_seq_files[i]
+  sequences <- Biostrings::readDNAStringSet(fasta_file)
+  Seqlist[[i]] <- as.character(sequences)
+}
+seq_list=unlist(Seqlist)
+
+pfm <- generate_PFM(seq_list)
+pwm <- seqLogo:: makePWM(pfm)
+print (paste0("gene number:", length(Acceptor_seq_files)))
+# Plot sequence logo
+
+seqLogo::seqLogo(pwm,ic.scale = F)
+
+```
+
+## Canocial acceptor site (AG)
+```{r, include=T}
+print (paste0("gene number:", length(Acceptor_seq_files)))
+# Apply filtering
+filtered_seq_list <-canocinal_acceptor_sequences(seq_list)
+
+seq_list=filtered_seq_list
+pfm <- generate_PFM(seq_list)
+pwm <- seqLogo:: makePWM(pfm)
+
+# Plot sequence logo
+seqLogo::seqLogo(pwm,ic.scale = F)
+```
