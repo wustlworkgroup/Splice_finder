@@ -31,24 +31,7 @@
 
 
   exit
-  # get gene exons and donor and acceptor information
-  if [ ! -f "$Output_path/${gene_input}_exons.csv" ]; then
-    echo "get exons from $gene_input and save it to $Output_path/${gene_input}_exons.csv"
-    python3 $PY_function_path/Extract_Exons_From_Gene.py $GTF_file $gene_input $Output_path
-  fi
-  
-  if [ ! -f $Output_path/${gene_input}_dna_acceptor_loc ]; then
-   python3 $PY_function_path/generate_gene.py "$Output_path/${gene_input}_exons.csv" $REF_path $Output_path
-  fi
-  
-  sed "s|^|samtools faidx $Hg38_fa |" "$Output_path/${gene_input}_dna_donor_loc" > "$Output_path/${gene_input}_dna_donor_loc2"
-  sh $Output_path/${gene_input}_dna_donor_loc2 > $Output_path/${gene_input}_dna_donor_seq
 
- sed "s|^|samtools faidx $Hg38_fa |" "$Output_path/${gene_input}_dna_acceptor_loc" > "$Output_path/${gene_input}_dna_acceptor_loc2"
-  sh $Output_path/${gene_input}_dna_acceptor_loc2 > $Output_path/${gene_input}_dna_acceptor_seq
-
- exit
- # Gene loc annotation
 
 
 
