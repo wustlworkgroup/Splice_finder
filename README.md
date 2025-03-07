@@ -10,6 +10,7 @@
 ## 1. Finding Splice doner and acceptor for single gene
 *   1.1 run splice_motif_finder_single_gene_UCSC.sh in sh_files folder 
 *   1.2 run Splice_motif_ggseqlogo.Rmd in R folder to get splice Doner and Acceptor motif logos
+*   1.3 examples: NF1 strand +; CDKN2A strand -, MTAP strand +; 
  
 ## 2. Finding Splice doner and acceptor for all protein-coding genes
   * 2.1 run splice_motif_finder_All_protein_coding_gene_UCSC.sh in sh_files folder
