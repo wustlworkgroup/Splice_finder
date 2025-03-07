@@ -2,10 +2,10 @@
 * These scripts are inspired by SplicdFinder https://github.com/deepomicslab/SpliceFinder/tree/master.
 * We provide two ways to detect splice doner and acceptor: 1. by exon position 2. by TF based model (models from SpliceFinder github)
 * How to define Donor and Acceptor
-  ** protein coding genes
-  ** have more than 1 exons
-  ** first exon does not have acceptor and last exon does not have Donor
-  ** Reverse the seq if strand is "-"
+  protein coding genes
+  have more than 1 exons
+  first exon does not have acceptor and last exon does not have Donor
+  Reverse the seq if strand is "-"
   
 ## 1. Finding Splice doner and acceptor for single gene
 *   1.1 run splice_motif_finder_single_gene_UCSC.sh in sh_files folder 
