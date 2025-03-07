@@ -6,6 +6,7 @@
  * have more than 1 exons
  * first exon does not have acceptor and last exon does not have Donor
  * Reverse the seq if strand is "-"
+ * In our code, only choose the transcript with max number of exons if gene has mulitple transcripts 
   
 ## 1. Finding Splice doner and acceptor for single gene
 *   1.1 run splice_motif_finder_single_gene_UCSC.sh in sh_files folder 
