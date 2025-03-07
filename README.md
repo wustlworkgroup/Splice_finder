@@ -14,6 +14,6 @@
  
 ## 2. Finding Splice doner and acceptor for all protein-coding genes
   * 2.1 run splice_motif_finder_All_protein_coding_gene_UCSC.sh in sh_files folder
-  * 2.2 run Splice_motif_ggseqlogo.Rmd in R folder to get splice Doner and Acceptor motif logos
+  * 2.2 run Splice_motif_ggseqlogo.Rmd in R folder to get splice Doner and Acceptor motif logos (redefine input donor and acceptor file)
 
 
