@@ -1,0 +1,144 @@
+---
+title: "Splice_logo"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F,include = F)
+```
+
+
+```{r}
+if (!requireNamespace("Biostrings", quietly = TRUE)) install.packages("Biostrings", repos="http://bioconductor.org/packages/release/bioc/")
+if (!requireNamespace("seqLogo", quietly = TRUE)) install.packages("seqLogo", repos="http://bioconductor.org/packages/release/bioc/")
+
+```
+
+```{r}
+# Function
+generate_PFM <- function(sequences) {
+  seq_length <- nchar(sequences[1])  # Get sequence length
+  bases <- c("A", "C", "G", "T")
+  
+  # Initialize PFM
+  pfm <- matrix(0, nrow = 4, ncol = seq_length, dimnames = list(bases, NULL))
+  
+  # Count occurrences
+  for (seq in sequences) {
+    for (i in 1:seq_length) {
+      base <- substr(seq, i, i)
+      pfm[base, i] <- pfm[base, i] + 1
+    }
+  }
+   column_sums <- colSums(pfm)
+  pfm <- sweep(pfm, 2, column_sums, FUN = "/") 
+  return(pfm)
+}
+
+canocinal_acceptor_sequences <- function(sequences) {
+   # Function to filter sequences where -6G and -7A
+  filtered_seqs <- sequences[
+    substr(sequences, nchar(sequences) - 5, nchar(sequences) - 5) == "G" &  # -6 position
+    substr(sequences, nchar(sequences) - 6, nchar(sequences) - 6) == "A"    # -7 position
+  ]
+  return(filtered_seqs)
+}
+
+canocinal_donor_sequences <- function(sequences) {
+   # Function to filter sequences where -6G and -7A
+  filtered_seqs <- sequences[
+    substr(sequences, nchar(sequences) - 2, nchar(sequences) - 2) == "T" &  # -6 position
+    substr(sequences, nchar(sequences) - 3, nchar(sequences) - 3) == "G"    # -7 position
+  ]
+  return(filtered_seqs)
+}
+```
+
+# All protein coding genes ggseqlogo
+```{r}
+# Load necessary libraries
+library(ggseqlogo)
+library(ggplot2)
+library(dplyr)
+library("BiocGenerics")
+
+# Define the function to generate sequence logos
+generate_sequence_logo <- function( donor_fasta_path, acceptor_fasta_path) {
+
+ Gene_name=basename(donor_fasta_path)%>%gsub("\\_.*","",.)
+ 
+  # Read sequences using Biostrings
+  donor_sequences <- Biostrings::readDNAStringSet(donor_fasta_path)
+  acceptor_sequences <- Biostrings::readDNAStringSet(acceptor_fasta_path)
+  
+  # Convert sequences to character vectors
+  donor_seq_list <- as.character(donor_sequences)
+  acceptor_seq_list <- as.character(acceptor_sequences)
+   
+ P1=ggseqlogo(donor_seq_list, method = 'prob') +ggtitle(paste0(Gene_name,"_Donor"))
+ P2=ggseqlogo(acceptor_seq_list, method = 'prob')+ggtitle(paste0(Gene_name,"_Acceptor"))
+ return(list(P1,P2))
+  # Filter canonical donor sequences (assuming a function 'canonical_donor_sequences' is defined)
+#  filtered_donor_seq_list <- canonical_donor_sequences(donor_seq_list)
+  
+  # Plot donor sequence logo
+#  ggseqlogo(filtered_donor_seq_list, method = 'bits') + ggtitle('Donor Sequence Logo')
+  
+  # Plot acceptor sequence logo
+#  ggseqlogo(acceptor_seq_list, method = 'bits') + ggtitle('Acceptor Sequence Logo')
+}
+
+generate_sequence_logo_2 <- function( donor_fasta_path, acceptor_fasta_path) {
+
+  # Read sequences using Biostrings
+  donor_sequences <- Biostrings::readDNAStringSet(donor_fasta_path)
+  
+  sequence_lengths <- width(donor_sequences)
+
+ # Keep only sequences with width == 13
+  donor_sequences <- donor_sequences[sequence_lengths == 13]
+ 
+  acceptor_sequences <- Biostrings::readDNAStringSet(acceptor_fasta_path)
+  sequence_lengths <- width(acceptor_sequences)
+
+ # Keep only sequences with width == 13
+  acceptor_sequences <-acceptor_sequences[sequence_lengths == 25]
+  # Convert sequences to character vectors
+  donor_seq_list <- as.character(donor_sequences)
+  acceptor_seq_list <- as.character(acceptor_sequences)
+   
+ P1=ggseqlogo(donor_seq_list, method = 'prob',col_scheme="base_pairing") +ggtitle("All_Donor")
+ 
+ P2=ggseqlogo(acceptor_seq_list, method = 'prob',col_scheme="base_pairing")+ggtitle("All_Acceptor")
+ return(list(P1,P2))
+ 
+}
+```
+
+
+```{r}
+Path="/media/yang/Data/SliceFinder"
+
+Input_data_path=file.path(Path,"out_predict","All_genes")
+dir(Input_data_path)
+# Example usage
+Donor_seq_file="All_donor_seq"
+Donor_fasta_file =file.path(Input_data_path,Donor_seq_file)
+acceptor_seq_file="All_acceptor_seq"
+acceeptor_fasta_file =file.path(Input_data_path,acceptor_seq_file)
+
+Plot1=generate_sequence_logo_2(Donor_fasta_file,acceeptor_fasta_file)
+
+```
+
+
+```{r,fig.width=12,fig.height=5,include=T}
+cowplot::plot_grid(plotlist =  Plot1,nrow=1,rel_widths=c(0.8,1))
+```
+
+```{r}
+knitr::knit_exit()
+```
+
+
+
